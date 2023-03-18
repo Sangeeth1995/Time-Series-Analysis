@@ -1,0 +1,398 @@
+This is the daily pageviews to a webpage since the start of 2022. Note that traffic to the page has weekly seasonality and a slight upwards trend. Also note that there are some days with anomalous traffic. Devise a methodology or write code to predict the daily pageviews to this page from now until the middle of next year. It doesn't have to be particularly polished - an outline will do. Justify any choices of data sets or sofware libraries considered.
+
+
+time series data to predict the daily price from now until the middle of next year.
+
+
+
+Here is an outline for a methodology to predict the daily pageviews to a webpage with weekly seasonality and a slight upwards trend:
+
+Collect and preprocess the data:
+
+Gather the daily pageview data from the webpage from the start of 2022 to the current date.
+Clean and format the data as necessary.
+Create new features such as day of the week, month, etc. to capture the weekly seasonality.
+Explore the data:
+
+Visualize the data to identify any patterns, trends or anomalies.
+Check for stationarity of the time series data, if not, make it stationary.
+Determine the appropriate time series model (e.g. ARIMA, SARIMA,ETS,Prophet etc) based on the exploratory analysis.
+Train the model:
+
+Split the data into train and test sets.
+Fit the chosen model to the training data.
+Use the test set to evaluate the performance of the model.
+Make predictions:
+
+Use the trained model to make predictions for the daily pageviews from now until the middle of next year.
+Validate the predictions:
+
+Compare the predicted values with the actual values for the test set.
+Evaluate the performance of the model using metrics such as mean absolute error and root mean squared error.
+Deploy the model:
+-Deploy the model in a production environment to make predictions in real-time.
+
+In this case, I would recommend using Prophet which is a well-documented and widely used library for time series forecasting, specifically designed for business time-series data. The library has built-in support for handling holidays, weekly seasonality, and trend changes.
+
+
+
+# import necessary libraries
+import pandas as pd
+from fbprophet import Prophet
+
+# read in the data from a csv file
+df = pd.read_csv('pageviews_data.csv')
+
+# convert the date column to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# set the date column as the index
+df.set_index('date', inplace=True)
+
+# rename the column with pageviews data
+df.rename(columns={'pageviews': 'y'}, inplace=True)
+
+# create a Prophet model and add weekly seasonality
+m = Prophet(weekly_seasonality=True)
+m.fit(df)
+
+# create a dataframe to hold future predictions
+future = m.make_future_dataframe(periods=365)
+
+# make predictions
+forecast = m.predict(future)
+
+# plot the forecast
+m.plot(forecast)
+
+
+This code assumes that your data is in a csv file named pageviews_data.csv with columns date and pageviews. The date column should be in a format that can be converted to a datetime object using the pd.to_datetime() function.
+
+This will create a forecast with daily granularity, including predictions for the weekly seasonality and a slight upward trend. You can also access the prediction by forecast['yhat']
+
+Also, it would be a good idea to split the data into train and test set and validate the model using evaluation metrics like Mean Absolute Error and Root Mean Squared Error.
+
+
++++++++++++++++++
+
+Here is an outline for a methodology to predict the daily pageviews to a webpage with weekly seasonality and a slight upwards trend:
+
+Collect and preprocess the data:
+
+Gather the daily pageview data from the webpage from the start of 2022 to the current date.
+Clean and format the data as necessary.
+Create new features such as day of the week, month, etc. to capture the weekly seasonality.
+Explore the data:
+
+Visualize the data to identify any patterns, trends or anomalies.
+Check for stationarity of the time series data, if not, make it stationary.
+Determine the appropriate time series model (e.g. ARIMA, SARIMA,ETS,Prophet etc) based on the exploratory analysis.
+Train the model:
+
+Split the data into train and test sets.
+Fit the chosen model to the training data.
+Use the test set to evaluate the performance of the model.
+Make predictions:
+
+Use the trained model to make predictions for the daily pageviews from now until the middle of next year.
+Validate the predictions:
+
+Compare the predicted values with the actual values for the test set.
+Evaluate the performance of the model using metrics such as mean absolute error and root mean squared error.
+Deploy the model:
+-Deploy the model in a production environment to make predictions in real-time.
+
+Here is the python code which will implement the methodology mentioned above using the Prophet library.
+
+
+# import necessary libraries
+import pandas as pd
+from fbprophet import Prophet
+from sklearn.metrics import mean_absolute_error,mean_squared_error
+from math import sqrt
+
+# read in the data from a csv file
+df = pd.read_csv('pageviews_data.csv')
+
+# convert the date column to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# set the date column as the index
+df.set_index('date', inplace=True)
+
+# rename the column with pageviews data
+df.rename(columns={'pageviews': 'y'}, inplace=True)
+
+#Splitting the data into train and test set
+train_data = df.iloc[:int(df.shape[0]*0.8)]
+test_data = df.iloc[int(df.shape[0]*0.8):]
+
+# create a Prophet model and add weekly seasonality
+m = Prophet(weekly_seasonality=True)
+m.fit(train_data)
+
+# create a dataframe to hold future predictions
+future = m.make_future_dataframe(periods=365)
+
+# make predictions
+forecast = m.predict(future)
+
+# evaluate the model
+predictions = forecast.iloc[-len(test_data):]['yhat']
+mae = mean_absolute_error(test_data['y'], predictions)
+rmse = sqrt(mean_squared_error(test_data['y'], predictions))
+
+print('MAE:', mae)
+print('RMSE:', rmse)
+
+# plot the forecast
+m.plot(forecast)
+
+
+++++
+
+
+# import necessary libraries
+import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.model_selection import train_test_split
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima_model import ARIMA
+import matplotlib.pyplot as plt
+
+# read in the data
+df = pd.read_csv('pageviews_data.csv')
+
+# convert the date column to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# set the date column as the index
+df.set_index('date', inplace=True)
+
+# rename the column with pageviews data
+df.rename(columns={'pageviews': 'y'}, inplace=True)
+
+# visualize the data
+df.y.plot()
+plt.show()
+
+# check for stationarity of the data
+result = adfuller(df.y)
+print('ADF Statistic: %f' % result[0])
+print('p-value: %f' % result[1])
+
+# difference the data to make it stationary
+df['y_diff'] = df.y - df.y.shift()
+df = df.dropna()
+result = adfuller(df.y_diff)
+print('ADF Statistic: %f' % result[0])
+print('p-value: %f' % result[1])
+
+# decompose the data to identify the trend, seasonal, and residual components
+decomposition = seasonal_decompose(df.y, model='multiplicative')
+decomposition.plot()
+plt.show()
+
+++++
+
+Arima
+
+# import necessary libraries
+import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.model_selection import train_test_split
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima_model import ARIMA
+import matplotlib.pyplot as plt
+
+# read in the data
+df = pd.read_csv('pageviews_data.csv')
+
+# convert the date column to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# set the date column as the index
+df.set_index('date', inplace=True)
+
+# rename the column with pageviews data
+df.rename(columns={'pageviews': 'y'}, inplace=True)
+
+# visualize the data
+df.y.plot()
+plt.show()
+
+# check for stationarity of the data
+result = adfuller(df.y)
+print('ADF Statistic: %f' % result[0])
+print('p-value: %f' % result[1])
+
+# difference the data to make it stationary
+df['y_diff'] = df.y - df.y.shift()
+df = df.dropna()
+result = adfuller(df.y_diff)
+print('ADF Statistic: %f' % result[0])
+print('p-value: %f' % result[1])
+
+# decompose the data to identify the trend, seasonal, and residual components
+decomposition = seasonal_decompose(df.y, model='multiplicative')
+decomposition.plot()
+plt.show()
+
+# split the data into train and test sets
+train, test = train_test_split(df, test_size=0.2, shuffle=False)
+
+# fit the ARIMA model
+model = ARIMA(train.y_diff, order=(1,1,1))
+model_fit = model.fit(disp=0)
+print(model_fit.summary())
+
+# make predictions
+predictions = model_fit.predict(start=test.index[0], end=test.index[-1], typ='levels')
+predictions = predictions + train.y.iloc[-1]
+
+# plot the predictions
+plt.plot(test.y)
+plt.plot(predictions)
+plt.show()
+
+# evaluate the performance of the model
+mae = mean_absolute_error(test.y, predictions)
+rmse = mean_squared_error(test.y, predictions)
+print('MAE: %f' % mae)
+print('RMSE: %f' % rmse)
++++++
+
+
+
+# import necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, LSTM
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+# read in the data
+df = pd.read_csv('pageviews_data.csv')
+
+# convert the date column to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# set the date column as the index
+df.set_index('date', inplace=True)
+
+# rename the column with pageviews data
+df.rename(columns={'pageviews': 'y'}, inplace=True)
+
+# visualize the data
+df.y.plot()
+plt.show()
+
+# split the data into train and test sets
+train, test = train_test_split(df, test_size=0.2, shuffle=False)
+
+# scale the data
+scaler = MinMaxScaler()
+train_scaled = scaler.fit_transform(train)
+test_scaled = scaler.transform(test)
+
+# create a function to create the dataset for the LSTM model
+def create_dataset(data, lookback=1):
+    data_x, data_y = [], []
+    for i in range(len(data) - lookback - 1):
+        a = data[i:(i + lookback), 0]
+        data_x.append(a)
+        data_y.append(data[i + lookback, 0])
+    return np.array(data_x), np.array(data_y)
+
+# create the train and test sets for the LSTM model
+lookback = 14
+train_x, train_y = create_dataset(train_scaled, lookback)
+test_x, test_y = create_dataset(test_scaled, lookback)
+
+# reshape the data for the LSTM model
+train_x = np.reshape(train_x, (train_x.shape[0], 1, train_x.shape[1]))
+test_x = np.reshape(test_x, (test_x.shape[0], 1, test_x.shape[1]))
+
+# create the LSTM model
+model = Sequential()
+model.add(LSTM(50, input_shape=(train_x.shape[1], train_x.shape[2])))
+model.add(Dense(1))
+model.compile(loss='mae', optimizer='adam')
+
+# fit the LSTM model
+history = model.fit(train_x, train_y, epochs=100, batch_size=72, validation_data=(test_x, test_y), verbose=2, shuffle=False)
+
+# make predictions
+predictions = model.predict(
+
++++
+
+
+# import necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, LSTM
+from matplotlib import pyplot as plt
+
+# read in the data
+df = pd.read_csv('pageviews_data.csv')
+
+# convert the date column to a datetime object
+df['date'] = pd.to_datetime(df['date'])
+
+# set the date column as the index
+df.set_index('date', inplace=True)
+
+# rename the column with pageviews data
+df.rename(columns={'pageviews': 'y'}, inplace=True)
+
+# visualize the data
+df.y.plot()
+plt.show()
+
+# define a function to create a dataset for the LSTM
+def create_dataset(data, look_back=1):
+    dataX, dataY = [], []
+    for i in range(len(data) - look_back):
+        a = data[i:(i + look_back), 0]
+        dataX.append(a)
+        dataY.append(data[i + look_back, 0])
+    return np.array(dataX), np.array(dataY)
+
+# create the dataset
+scaler = MinMaxScaler(feature_range=(0, 1))
+data = scaler.fit_transform(df.y.values.reshape(-1, 1))
+look_back = 7
+X, y = create_dataset(data, look_back)
+
+# split the data into train and test sets
+train_size = int(len(data) * 0.8)
+test_size = len(data) - train_size
+train, test = data[0:train_size,:], data[train_size:len(data),:]
+
+# reshape the input data for the LSTM
+X_train = np.reshape(train, (train.shape[0], 1, train.shape[1]))
+X_test = np.reshape(test, (test.shape[0], 1, test.shape[1]))
+
+# create the LSTM model
+model = Sequential()
+model.add(LSTM(100, input_shape=(X_train.shape[1], X_train.shape[2])))
+model.add(Dense(1))
+model.compile(loss='mean_squared_error', optimizer='adam')
+
+# fit the LSTM model to the training data
+history = model.fit(X_train, y_train, epochs=100, batch_size=1, validation_data=(X_test, y_test), verbose=2, shuffle=False)
+
+# make predictions
+train_predict = model.predict(X_train)
+test_predict = model.predict(X_test)
+
+# invert the predictions and targets to their
